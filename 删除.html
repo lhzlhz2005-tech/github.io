@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>恭喜你中奖了！</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        prank: {
+                            yellow: '#FFD700',
+                            red: '#FF0000',
+                            blue: '#0000FF'
+                        }
+                    },
+                    fontFamily: {
+                        comic: ['Comic Sans MS', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+            }
+            .animate-bounce-random {
+                animation: bounce-random 0.5s infinite;
+            }
+            .animate-spin-fast {
+                animation: spin 1s linear infinite;
+            }
+            .animate-pulse-fast {
+                animation: pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+        }
+
+        @keyframes bounce-random {
+            0%, 100% {
+                transform: translateY(-5%) rotate(var(--rotation, 0deg));
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+            50% {
+                transform: translateY(0) rotate(calc(var(--rotation, 0deg) + 5deg));
+                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+        }
+    </style>
+</head>
+<body class="overflow-hidden bg-gradient-to-r from-prank-red to-prank-blue min-h-screen">
+    <!-- 背景音乐 -->
+    <audio id="prank-sound" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- 主内容 -->
+    <div class="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-screen text-center">
+        <div class="absolute top-0 left-0 w-full p-4 flex justify-between items-center z-10">
+            <button id="close-btn" class="bg-white text-prank-red px-4 py-2 rounded-full font-bold text-lg shadow-lg transform transition-transform hover:scale-110">
+                关闭 <i class="fa fa-times ml-2"></i>
+            </button>
+            <div class="text-prank-yellow font-comic text-xl font-bold animate-pulse-fast">
+                <i class="fa fa-star animate-spin-fast"></i> 特别惊喜 <i class="fa fa-star animate-spin-fast"></i>
+            </div>
+        </div>
+
+        <h1 class="text-[clamp(2rem,8vw,5rem)] font-comic font-extrabold text-prank-yellow mb-6 text-shadow animate-bounce-random" style="--rotation: 3deg">
+            恭喜你！
+        </h1>
+        
+        <div class="bg-white/90 backdrop-blur-sm p-8 rounded-3xl shadow-2xl max-w-2xl w-full mb-8 transform transition-all hover:scale-105">
+            <p class="text-[clamp(1.5rem,5vw,3rem)] font-comic text-prank-red mb-6 animate-pulse-fast">
+                你是今天的幸运儿！
+            </p>
+            <p class="text-[clamp(1rem,3vw,1.5rem)] font-comic text-gray-800 mb-8">
+                你成功触发了我们的特别彩蛋！
+                为了庆祝，我们将为你播放特别音乐！
+            </p>
+            <div class="flex justify-center">
+                <img src="https://picsum.photos/400/300" alt="搞笑图片" class="rounded-xl shadow-lg transform rotate-3 transition-all hover:rotate-0 hover:scale-110">
+            </div>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-4">
+            <button class="bg-prank-yellow text-prank-red px-8 py-4 rounded-full font-bold text-xl shadow-lg transform transition-all hover:scale-110 active:scale-95" id="celebrate-btn">
+                点击庆祝 <i class="fa fa-party-horn ml-2"></i>
+            </button>
+            <button class="bg-prank-blue text-white px-8 py-4 rounded-full font-bold text-xl shadow-lg transform transition-all hover:scale-110 active:scale-95" id="surprise-btn">
+                更多惊喜 <i class="fa fa-gift ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 随机浮动元素 -->
+    <div id="floating-elements"></div>
+
+    <script>
+        // 播放背景音乐
+        const sound = document.getElementById('prank-sound');
+        sound.volume = 0.3;
+        
+        // 延迟播放音乐，增加惊喜效果
+        setTimeout(() => {
+            sound.play().catch(e => console.log("Auto-play prevented:", e));
+        }, 1000);
+
+        // 关闭按钮功能 - 实际上不会关闭，只是移动位置
+        const closeBtn = document.getElementById('close-btn');
+        closeBtn.addEventListener('click', () => {
+            // 随机移动关闭按钮位置
+            const x = Math.random() * (window.innerWidth - 150);
+            const y = Math.random() * (window.innerHeight - 50);
+            closeBtn.style.position = 'absolute';
+            closeBtn.style.left = `${x}px`;
+            closeBtn.style.top = `${y}px`;
+            
+            // 改变按钮文本增加趣味性
+            const texts = ["别点我！", "抓不到我！", "放弃吧！", "嘿嘿嘿！"];
+            closeBtn.innerHTML = `${texts[Math.floor(Math.random() * texts.length)]} <i class="fa fa-times ml-2"></i>`;
+        });
+
+        // 庆祝按钮功能
+        const celebrateBtn = document.getElementById('celebrate-btn');
+        celebrateBtn.addEventListener('click', () => {
+            createConfetti();
+            sound.volume = 0.8;
+            
+            // 改变背景颜色
+            document.body.classList.remove('from-prank-red', 'to-prank-blue');
+            document.body.classList.add('from-green-500', 'to-purple-500');
+            
+            setTimeout(() => {
+                document.body.classList.remove('from-green-500', 'to-purple-500');
+                document.body.classList.add('from-prank-red', 'to-prank-blue');
+            }, 2000);
+        });
+
+        // 惊喜按钮功能
+        const surpriseBtn = document.getElementById('surprise-btn');
+        surpriseBtn.addEventListener('click', () => {
+            // 让页面元素随机移动
+            const elements = document.querySelectorAll('h1, p, img, button');
+            elements.forEach(el => {
+                if (el.id !== 'surprise-btn') { // 不移动当前点击的按钮
+                    el.style.transition = 'all 0.5s ease';
+                    el.style.transform = `translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px) rotate(${Math.random() * 40 - 20}deg)`;
+                    
+                    setTimeout(() => {
+                        el.style.transform = '';
+                    }, 1000);
+                }
+            });
+            
+            // 播放额外音效
+            const extraSound = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3');
+            extraSound.volume = 0.5;
+            extraSound.play();
+        });
+
+        // 创建彩屑效果
+        function createConfetti() {
+            const container = document.getElementById('floating-elements');
+            const colors = ['#FF5252', '#FFEB3B', '#4CAF50', '#2196F3', '#9C27B0'];
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'absolute rounded-full animate-bounce-random';
+                confetti.style.width = `${Math.random() * 10 + 5}px`;
+                confetti.style.height = `${Math.random() * 10 + 5}px`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.top = `-${Math.random() * 20 + 10}px`;
+                confetti.style.opacity = Math.random() * 0.8 + 0.2;
+                confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                confetti.style.zIndex = '100';
+                
+                container.appendChild(confetti);
+                
+                // 一段时间后移除彩屑
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+
+        // 随机生成浮动元素
+        function createFloatingElements() {
+            const container = document.getElementById('floating-elements');
+            const emojis = ['🎉', '🎊', '🎈', '🎁', '🤡', '😂', '😜', '🙌'];
+            
+            setInterval(() => {
+                const element = document.createElement('div');
+                element.className = 'absolute font-bold animate-bounce-random';
+                element.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                element.style.fontSize = `${Math.random() * 20 + 20}px`;
+                element.style.left = `${Math.random() * 100}vw`;
+                element.style.top = `-${Math.random() * 50 + 20}px`;
+                element.style.animationDuration = `${Math.random() * 4 + 3}s`;
+                element.style.zIndex = '10';
+                
+                container.appendChild(element);
+                
+                // 一段时间后移除元素
+                setTimeout(() => {
+                    element.remove();
+                }, 7000);
+            }, 500);
+        }
+
+        // 页面加载完成后开始创建浮动元素
+        window.addEventListener('load', createFloatingElements);
+
+        // 增加窗口大小变化时的响应
+        window.addEventListener('resize', () => {
+            // 调整关闭按钮位置，确保在窗口内
+            const x = Math.min(closeBtn.offsetLeft, window.innerWidth - 150);
+            const y = Math.min(closeBtn.offsetTop, window.innerHeight - 50);
+            closeBtn.style.left = `${x}px`;
+            closeBtn.style.top = `${y}px`;
+        });
+    </script>
+</body>
+</html>
